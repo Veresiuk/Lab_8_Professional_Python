@@ -1,0 +1,209 @@
+POST /categories
+  body: {"name": "electronics"}
+  -> 201 Created
+{
+  "id": 1,
+  "name": "electronics"
+}
+
+POST /categories
+  body: {"name": "stationery"}
+  -> 201 Created
+{
+  "id": 2,
+  "name": "stationery"
+}
+
+POST /products
+  body: {"name": "Laptop", "category_id": 1, "price": 25000, "quantity": 3}
+  -> 201 Created
+{
+  "id": 1,
+  "name": "Laptop",
+  "category_id": 1,
+  "price": 25000.0,
+  "quantity": 3
+}
+
+POST /products
+  body: {"name": "Mouse", "category_id": 1, "price": 500, "quantity": 20}
+  -> 201 Created
+{
+  "id": 2,
+  "name": "Mouse",
+  "category_id": 1,
+  "price": 500.0,
+  "quantity": 20
+}
+
+POST /products
+  body: {"name": "Notebook", "category_id": 2, "price": 40.5, "quantity": 100}
+  -> 201 Created
+{
+  "id": 3,
+  "name": "Notebook",
+  "category_id": 2,
+  "price": 40.5,
+  "quantity": 100
+}
+
+GET /products/1
+  -> 200 OK
+{
+  "id": 1,
+  "name": "Laptop",
+  "category_id": 1,
+  "price": 25000.0,
+  "quantity": 3
+}
+
+GET /products
+  -> 200 OK
+[
+  {
+    "id": 1,
+    "name": "Laptop",
+    "category_id": 1,
+    "price": 25000.0,
+    "quantity": 3
+  },
+  {
+    "id": 2,
+    "name": "Mouse",
+    "category_id": 1,
+    "price": 500.0,
+    "quantity": 20
+  }
+]
+
+GET /products
+  -> 200 OK
+[
+  {
+    "id": 3,
+    "name": "Notebook",
+    "category_id": 2,
+    "price": 40.5,
+    "quantity": 100
+  }
+]
+
+GET /categories/1/products
+  -> 200 OK
+[
+  {
+    "id": 1,
+    "name": "Laptop",
+    "category_id": 1,
+    "price": 25000.0,
+    "quantity": 3
+  },
+  {
+    "id": 2,
+    "name": "Mouse",
+    "category_id": 1,
+    "price": 500.0,
+    "quantity": 20
+  }
+]
+
+PATCH /products/2
+  body: {"price": 450, "quantity": 25}
+  -> 200 OK
+{
+  "id": 2,
+  "name": "Mouse",
+  "category_id": 1,
+  "price": 450.0,
+  "quantity": 25
+}
+
+POST /products/1/purchase
+  body: {"quantity": 2}
+  -> 200 OK
+{
+  "order_id": 1,
+  "product_id": 1,
+  "quantity": 2,
+  "total_price": 50000.0,
+  "remaining_quantity": 1
+}
+
+POST /products/1/purchase
+  body: {"quantity": 5}
+  -> 409 Conflict
+{
+  "detail": "Only 1 item(s) left, requested 5",
+  "code": "insufficient_stock"
+}
+
+POST /products
+  body: {"name": "X", "category_id": 1, "price": -10, "quantity": 1}
+  -> 422 Unprocessable Entity
+{"detail": [{"type": "string_too_short", "loc": ["body", "name"], "msg": "String should have at least 2 characters", "input": "X", "ctx": {"min_length": 2}}, {"type": "greater_than", "loc": ["body", "price"], "msg": "Input should be greater than 0", "input": -10, "ctx": {"gt": 0.0}}]}
+
+GET /products/999
+  -> 404 Not Found
+{
+  "detail": "Product 999 not found",
+  "code": "product_not_found"
+}
+
+GET /products/summary
+  -> 200 OK
+{
+  "products_count": 3,
+  "total_stock_value": 40300.0,
+  "most_expensive": {
+    "id": 1,
+    "name": "Laptop",
+    "category_id": 1,
+    "price": 25000.0,
+    "quantity": 1
+  }
+}
+
+POST /products/batch
+  body: {"product_ids": [3, 1, 2]}
+  -> 200 OK
+[
+  {
+    "id": 3,
+    "name": "Notebook",
+    "category_id": 2,
+    "price": 40.5,
+    "quantity": 100
+  },
+  {
+    "id": 1,
+    "name": "Laptop",
+    "category_id": 1,
+    "price": 25000.0,
+    "quantity": 1
+  },
+  {
+    "id": 2,
+    "name": "Mouse",
+    "category_id": 1,
+    "price": 450.0,
+    "quantity": 25
+  }
+]
+
+POST /products/batch
+  body: {"product_ids": [1, 999]}
+  -> 404 Not Found
+{
+  "detail": "One of the products was not found"
+}
+
+DELETE /products/3
+  -> 204 No Content
+(empty)
+
+GET /products/3
+  -> 404 Not Found
+{
+  "detail": "Product 3 not found",
+  "code": "product_not_found"
+}
